@@ -102,4 +102,24 @@ async function registerPushToken(req, res) {
   }
 }
 
-export { spotifyCallback, registerPushToken, login };
+async function me(req, res){
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "Not authenticated" });
+}
+
+try {
+    const results = await db.query("SELECT * FROM users WHERE id = $1", [req.session.userId]);
+
+    if(results.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    return res.json(results.rows[0]);
+
+  } catch (err) {
+    console.error("Me error:", err.message);
+    return res.status(500).json({ error: "Failed to fetch user" });
+  }
+}
+
+export { spotifyCallback, registerPushToken, login, me };

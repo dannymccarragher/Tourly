@@ -4,11 +4,15 @@ import cors from "cors";
 import authRoutes from "./routes/auth.js";
 import artistRoutes from "./routes/artists.js";
 import showRoutes from "./routes/shows.js";
-import { startCronJobs } from "./jobs/tourChecker.js";
 import session from "express-session";
-
+import statsRoutes from "./routes/stats.js";
 const app = express();
-app.use(cors());
+
+app.use(cors({
+  origin: ["http://127.0.0.1:3000", "http://localhost:3000"],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -21,9 +25,10 @@ app.use(session({
 app.use("/auth", authRoutes);
 app.use("/artists", artistRoutes);
 app.use("/shows", showRoutes);
+app.use("/stats", statsRoutes);
 
 // Start background jobs
-startCronJobs();
+// startCronJobs();
 
 
 const PORT = process.env.PORT || 3000;

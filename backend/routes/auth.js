@@ -1,5 +1,5 @@
 import express from "express";
-import { spotifyCallback, registerPushToken, login } from "../controllers/authController.js";
+import { spotifyCallback, registerPushToken, login, me } from "../controllers/authController.js";
 
 const router = express.Router();
 
@@ -11,5 +11,8 @@ router.get("/login", login);
 
 // Save Expo push token for notifications
 router.post("/push-token", registerPushToken);
+
+// Get user data
+router.get("/me", me);
 
 export default router;
