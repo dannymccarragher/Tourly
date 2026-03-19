@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { theme } from "@/constants/theme";
 
 const API = "http://127.0.0.1:5000";
@@ -26,6 +27,19 @@ export default function StatsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  async function logout() {
+    setLoggingOut(true);
+    try {
+      const res = await fetch(`${API}/auth/logout`, { method: "POST", credentials: "include" });
+      const data = await res.json();
+      console.log(data); 
+      window.location.href = "/";
+    } catch {
+      setLoggingOut(false);
+    }
+  }
 
   async function sync() {
     setSyncing(true);
@@ -98,28 +112,56 @@ export default function StatsPage() {
     <div className="min-h-screen p-8" style={{ maxWidth: "720px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "2.5rem" }}>
 
       {/* header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h1 className="text-3xl font-bold" style={{ color: theme.text.primary }}>
           This week
         </h1>
-        <button
-          onClick={async () => { await sync(); await fetchData(); }}
-          disabled={syncing}
-          style={{
-            background: syncing ? theme.bg.highlight : theme.accent.green,
-            color: syncing ? theme.text.muted : "#000",
-            fontWeight: 600,
-            fontSize: "14px",
-            padding: "10px 24px",
-            borderRadius: "9999px",
-            border: "none",
-            cursor: syncing ? "not-allowed" : "pointer",
-            opacity: syncing ? 0.6 : 1,
-            transition: "background 0.15s ease",
-          }}
-        >
-          {syncing ? "Syncing..." : "Sync plays"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={async () => { await sync(); await fetchData(); }}
+            disabled={syncing}
+            style={{
+              background: syncing ? theme.bg.highlight : theme.accent.green,
+              color: syncing ? theme.text.muted : "#000",
+              fontWeight: 600,
+              fontSize: "14px",
+              padding: "10px 24px",
+              borderRadius: "9999px",
+              border: "none",
+              cursor: syncing ? "not-allowed" : "pointer",
+              opacity: syncing ? 0.6 : 1,
+              transition: "background 0.15s ease",
+            }}
+          >
+            {syncing ? "Syncing..." : "Sync plays"}
+          </button>
+          <button
+            onClick={logout}
+            disabled={loggingOut}
+            style={{
+              background: "transparent",
+              color: theme.text.muted,
+              fontSize: "14px",
+              fontWeight: 500,
+              padding: "10px 16px",
+              borderRadius: "9999px",
+              border: `1px solid ${theme.border.subtle}`,
+              cursor: loggingOut ? "not-allowed" : "pointer",
+              opacity: loggingOut ? 0.5 : 1,
+              transition: "color 0.15s ease, border-color 0.15s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = theme.text.primary;
+              e.currentTarget.style.borderColor = theme.border.default;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = theme.text.muted;
+              e.currentTarget.style.borderColor = theme.border.subtle;
+            }}
+          >
+            {loggingOut ? "Logging out..." : "Log out"}
+          </button>
+        </div>
       </div>
 
       {/* stat cards */}
@@ -151,13 +193,26 @@ export default function StatsPage() {
             {leaderboard.map((user, i) => {
               const isYou = user.id === userId;
               return (
-                <div
+                <Link
                   key={user.id}
+                  href={`/stats/user/${user.id}`}
                   className="flex items-center gap-4 p-4 rounded-xl"
                   style={{
                     background: isYou ? "rgba(162,89,255,0.08)" : theme.bg.surface,
                     border: `1px solid ${isYou ? theme.accent.purple : theme.border.subtle}`,
-                    transition: "background 0.15s ease",
+                    transition: "background 0.15s ease, border-color 0.15s ease",
+                    textDecoration: "none",
+                    display: "flex",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = isYou
+                      ? "rgba(162,89,255,0.14)"
+                      : theme.bg.elevated;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = isYou
+                      ? "rgba(162,89,255,0.08)"
+                      : theme.bg.surface;
                   }}
                 >
                   <span className="text-lg font-semibold w-5" style={{ color: theme.text.muted }}>
@@ -206,12 +261,13 @@ export default function StatsPage() {
                       {user.total_songs} songs
                     </p>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
         )}
       </div>
+
     </div>
   );
 }
