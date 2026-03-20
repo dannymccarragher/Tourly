@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { theme } from "@/constants/theme";
 
+import { Trophy, ChartColumnIncreasing, Guitar } from 'lucide-react';
+
+
 const API = "http://127.0.0.1:5000";
 
 function SpotifyIcon() {
@@ -16,17 +19,17 @@ function SpotifyIcon() {
 
 const features = [
   {
-    icon: "📊",
+    icon: <ChartColumnIncreasing />,
     title: "Weekly Stats",
     desc: "Songs played, minutes listened, and your top artists — refreshed every week.",
   },
   {
-    icon: "🏆",
+    icon: <Trophy />,
     title: "Leaderboard",
     desc: "Compete with friends. See who's been listening the most this week.",
   },
   {
-    icon: "🎸",
+    icon: <Guitar />,
     title: "Concert Discovery",
     desc: "Follow artists and find upcoming shows near you, powered by Ticketmaster.",
   },
@@ -97,7 +100,7 @@ export default function LandingPage() {
         />
       </div>
 
-      {/* Top nav */}
+      {/* Top nav
       <nav
         className="relative z-10 flex items-center justify-between px-8 py-5"
       >
@@ -107,7 +110,7 @@ export default function LandingPage() {
         >
           Chartify
         </span>
-      </nav>
+      </nav> */}
 
       {/* Hero */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 py-12">
@@ -132,17 +135,31 @@ export default function LandingPage() {
         </div>
 
         <h1
-          className="text-5xl sm:text-7xl font-bold mb-6"
+          className="text-7xl sm:text-9xl font-black py-8 pr-4 tracking-tight"
           style={{
-            color: theme.text.primary,
-            letterSpacing: "-2px",
-            lineHeight: 1.05,
+            background: "linear-gradient(135deg, #a259ff 0%, #1ed760 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            letterSpacing: "3px",
+            lineHeight: 1,
+            filter: "drop-shadow(0 0 40px rgba(162,89,255,0.35))",
           }}
         >
-          Your music.
-          <br />
-          <span style={{ color: theme.accent.green }}>Your stats.</span>
+          Chartify
         </h1>
+
+        <p
+          className="text-2xl sm:text-3xl font-semibold mb-6"
+          style={{
+            color: theme.text.primary,
+            letterSpacing: "-1px",
+            lineHeight: 1.2,
+          }}
+        >
+          Your music.{" "}
+          <span style={{ color: theme.accent.green }}>Your stats.</span>
+        </p>
 
         <p
           className="text-lg sm:text-xl mb-10"
