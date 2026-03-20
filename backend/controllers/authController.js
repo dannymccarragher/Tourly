@@ -84,13 +84,11 @@ async function spotifyCallback(req, res) {
       console.error("Background follows sync error:", err.message)
     );
 
-    return res.redirect(
-      "http://127.0.0.1:3000/#"
-    );
+    return res.redirect(process.env.SPOTIFY_SUCCESS_REDIRECT_URI);
   } catch (err) {
     console.error("Spotify callback error:", err.message);
     return res.redirect(
-      "http://127.0.0.1:3000/#" + new URLSearchParams({ error: "invalid_token" }).toString()
+      process.env.SPOTIFY_SUCCESS_REDIRECT_URI + new URLSearchParams({ error: "invalid_token" }).toString()
     );
   }
 }
