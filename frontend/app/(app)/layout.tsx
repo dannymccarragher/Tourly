@@ -60,6 +60,15 @@ function UsersIcon({ size = 18 }: { size?: number }) {
   );
 }
 
+function SparkleIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3l1.88 5.47a1 1 0 0 0 .65.65L20 11l-5.47 1.88a1 1 0 0 0-.65.65L12 19l-1.88-5.47a1 1 0 0 0-.65-.65L4 11l5.47-1.88a1 1 0 0 0 .65-.65L12 3z" />
+      <path d="M5 3l.88 2.12a.5.5 0 0 0 .32.32L8 6l-1.8.56a.5.5 0 0 0-.32.32L5 9l-.88-2.12a.5.5 0 0 0-.32-.32L2 6l1.8-.56a.5.5 0 0 0 .32-.32L5 3z" />
+    </svg>
+  );
+}
+
 function LogOutIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -76,6 +85,7 @@ const navItems = [
   { href: "/shows", label: "Shows", Icon: CalendarIcon },
   { href: "/artists", label: "Artists", Icon: MusicIcon },
   { href: "/friends", label: "Friends", Icon: UsersIcon },
+  { href: "/recommendations", label: "For You", Icon: SparkleIcon },
 ];
 
 type User = {
