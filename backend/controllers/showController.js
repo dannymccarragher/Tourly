@@ -25,18 +25,15 @@ function mapEvent(event, artist, followed) {
 }
 
 async function getNearbyShows(req, res) {
-  const { lat, lng, city, genreId } = req.query;
+  const { lat, lng, city, genreId, keyword } = req.query;
 
-  if (!city && (!lat || !lng)) {
-    return res.status(400).json({ error: "Provide either city or lat+lng" });
+  if (!city && (!lat || !lng) && !keyword) {
+    return res.status(400).json({ error: "Provide city, lat+lng, or keyword" });
   }
 
   if (!req.session.userId) {
     return res.status(401).json({ error: "Not authenticated" });
   }
-
-  const locationParams = buildLocationParams(lat, lng, city);
-  const extraParams = genreId ? { genreId } : {};
 
   try {
     const { rows: follows } = await db.query(
@@ -47,6 +44,50 @@ async function getNearbyShows(req, res) {
     const followedNames = new Set(
       follows.map((f) => f.artist_name.toLowerCase())
     );
+
+    // ── Keyword (artist) search — no location required ──────────────────────
+    if (keyword) {
+      const seenIds = new Set();
+      const followedShows = [];
+      const otherShows = [];
+
+      try {
+        const { data } = await ticketmaster.get("/events.json", {
+          params: {
+            keyword,
+            classificationName: "music",
+            sort: "date,asc",
+            size: 20,
+            ...(genreId ? { genreId } : {}),
+          },
+        });
+
+        for (const event of data._embedded?.events ?? []) {
+          if (seenIds.has(event.id)) continue;
+          seenIds.add(event.id);
+
+          const artistName =
+            event._embedded?.attractions?.[0]?.name ?? keyword;
+          const isFollowed = followedNames.has(artistName.toLowerCase());
+
+          if (isFollowed) {
+            followedShows.push(mapEvent(event, artistName, true));
+          } else {
+            otherShows.push(mapEvent(event, artistName, false));
+          }
+        }
+      } catch (err) {
+        console.error("Keyword shows error:", err.message);
+      }
+
+      followedShows.sort((a, b) => new Date(a.date) - new Date(b.date));
+      otherShows.sort((a, b) => new Date(a.date) - new Date(b.date));
+      return res.json([...followedShows, ...otherShows]);
+    }
+
+    // ── Location-based search ────────────────────────────────────────────────
+    const locationParams = buildLocationParams(lat, lng, city);
+    const extraParams = genreId ? { genreId } : {};
 
     const seenIds = new Set();
     const followedShows = [];
