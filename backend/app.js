@@ -9,18 +9,36 @@ import statsRoutes from "./routes/stats.js";
 import friendRoutes from "./routes/friends.js";
 const app = express();
 
+const allowedOrigins = [
+  "http://127.0.0.1:3000",
+  "http://localhost:3000",
+  process.env.FRONTEND_URL,
+];
+
 app.use(cors({
-  origin: ["http://127.0.0.1:3000", "http://localhost:3000"],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
 
 app.use(express.json());
+const isProd = process.env.NODE_ENV === "production";
+
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { httpOnly: true, secure: false },
-  maxAge: 1000 * 60 * 60 * 24 * 7 
+  cookie: {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+    maxAge: 1000 * 60 * 60 * 24 * 7
+  }
 }));
 
 // Routes
