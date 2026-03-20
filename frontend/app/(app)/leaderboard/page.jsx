@@ -56,7 +56,7 @@ export default function LeaderboardPage() {
           Leaderboard
         </h1>
         <p className="text-sm" style={{ color: theme.text.muted }}>
-          Ranked by minutes listened this week ·{" "}
+          Ranked by minutes listened this week · friends only ·{" "}
           <span style={{ color: theme.text.secondary }}>
             {leaderboard.length} {leaderboard.length === 1 ? "listener" : "listeners"}
           </span>
@@ -164,7 +164,7 @@ export default function LeaderboardPage() {
       {/* Full list */}
       {filtered.length === 0 ? (
         <p className="text-center py-12" style={{ color: theme.text.muted }}>
-          No users found.
+          {search ? "No friends found matching your search." : "Add friends to see them on the leaderboard."}
         </p>
       ) : (
         <div
