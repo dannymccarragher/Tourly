@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { theme } from "@/constants/theme";
-
-const API = "http://127.0.0.1:5000";
+import { API } from "../../../lib/api";
 
 const RANGES = [
   { key: "4weeks", label: "4 Weeks" },

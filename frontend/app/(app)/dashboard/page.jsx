@@ -3,8 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { theme } from "@/constants/theme";
-
-const API = "http://127.0.0.1:5000";
+import { API } from "../../lib/api";
 
 export default function DashboardPage() {
   const router = useRouter();

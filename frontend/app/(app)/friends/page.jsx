@@ -3,8 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { theme } from "@/constants/theme";
-
-const API = "http://127.0.0.1:5000";
+import { API } from "../../lib/api";
 
 function Avatar({ user, size = 40 }) {
   if (user.avatar_url) {

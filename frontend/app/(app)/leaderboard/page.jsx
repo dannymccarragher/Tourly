@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { theme } from "@/constants/theme";
-
-const API = "http://127.0.0.1:5000";
+import { API } from "../../lib/api";
 
 
 export default function LeaderboardPage() {

@@ -1,6 +1,8 @@
+import { API } from "../lib/api";
+
 const Login = () => {
     return (
-        <a href="http://localhost:5000/auth/login">
+        <a href={`${API}/auth/login`}>
             <button>Login with Spotify</button>
         </a>
     );

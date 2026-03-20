@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation";
 import { theme } from "@/constants/theme";
 
 import { Trophy, ChartColumnIncreasing, Guitar } from 'lucide-react';
-
-
-const API = "http://127.0.0.1:5000";
+import { API } from "./lib/api";
 
 function SpotifyIcon() {
   return (
