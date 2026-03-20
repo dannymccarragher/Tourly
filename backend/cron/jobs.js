@@ -3,60 +3,45 @@ import db from "../db.js";
 import { syncUserPlays } from "../controllers/statsController.js";
 import { refreshAccessToken } from "../utils/spotify.js";
 
-function startCronJobs() {
-  // hourly sync for all users
-  cron.schedule("0 * * * *", async () => {
-    console.log("Running hourly sync...");
+const BATCH_SIZE = 5;
+const DELAY_BETWEEN_USERS = 500;
+const DELAY_BETWEEN_BATCHES = 3000;
 
-    const { rows: users } = await db.query(
-      "SELECT id, refresh_token FROM users WHERE refresh_token IS NOT NULL"
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function startCronJobs() {
+  console.log(`[cron] Starting sync at ${new Date().toISOString()}`);
+
+  const { rows: users } = await db.query(
+    `SELECT id, refresh_token FROM users
+     WHERE refresh_token IS NOT NULL`
+  );
+
+  console.log(`[cron] Syncing ${users.length} users`);
+
+  for (let i = 0; i < users.length; i += BATCH_SIZE) {
+    const batch = users.slice(i, i + BATCH_SIZE);
+
+    await Promise.all(
+      batch.map(async (user, index) => {
+        await sleep(index * DELAY_BETWEEN_USERS);
+        try {
+          const access_token = await refreshAccessToken(user.refresh_token);
+          const synced = await syncUserPlays(user.id, access_token);
+          console.log(`[cron] User ${user.id}: synced ${synced} plays`);
+        } catch (err) {
+          console.error(`[cron] User ${user.id} failed:`, err.message);
+        }
+      })
     );
 
-    for (const user of users) {
-      try {
-        const access_token = await refreshAccessToken(user.refresh_token);
-        await syncUserPlays(user.id, access_token);
-        console.log(`Synced user ${user.id}`);
-      } catch (err) {
-        console.error(`Failed to sync user ${user.id}:`, err.message);
-      }
+    if (i + BATCH_SIZE < users.length) {
+      console.log(`[cron] Batch done, waiting ${DELAY_BETWEEN_BATCHES}ms...`);
+      await sleep(DELAY_BETWEEN_BATCHES);
     }
-  });
+  }
 
-  // weekly aggregation every monday midnight
-  cron.schedule("0 0 * * 1", async () => {
-    console.log("Running weekly aggregation...");
-    try {
-      await db.query(`
-        INSERT INTO weekly_stats (user_id, week_start, total_songs, total_minutes, top_artist)
-        SELECT
-          user_id,
-          date_trunc('week', played_at)::DATE as week_start,
-          COUNT(*) as total_songs,
-          SUM(duration_ms) / 60000 as total_minutes,
-          (
-            SELECT artist_name FROM plays p2
-            WHERE p2.user_id = p.user_id
-            AND date_trunc('week', p2.played_at) = date_trunc('week', p.played_at)
-            GROUP BY artist_name
-            ORDER BY COUNT(*) DESC
-            LIMIT 1
-          ) as top_artist
-        FROM plays p
-        WHERE played_at < date_trunc('week', NOW())
-        GROUP BY user_id, date_trunc('week', played_at)
-        ON CONFLICT (user_id, week_start) DO NOTHING
-      `);
-
-      await db.query(`
-        DELETE FROM plays WHERE played_at < date_trunc('week', NOW())
-      `);
-
-      console.log("Weekly aggregation complete");
-    } catch (err) {
-      console.error("Weekly aggregation error:", err.message);
-    }
-  });
+  console.log(`[cron] Sync complete at ${new Date().toISOString()}`);
 }
 
 export { startCronJobs };
