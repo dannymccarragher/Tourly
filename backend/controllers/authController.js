@@ -1,5 +1,6 @@
 import axios from "axios";
 import db from "../db.js";
+import { syncFollowedArtists } from "./artistController.js";
 
 async function login(req, res) {
   const state = crypto.randomUUID();
@@ -77,6 +78,11 @@ async function spotifyCallback(req, res) {
 
     req.session.userId = userId;
     req.session.access_token = access_token;
+
+    // Seed the follows table from Spotify in the background — don't block the redirect
+    syncFollowedArtists(userId, access_token).catch((err) =>
+      console.error("Background follows sync error:", err.message)
+    );
 
     return res.redirect(
       "http://127.0.0.1:3000/#"

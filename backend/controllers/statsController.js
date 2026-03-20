@@ -100,6 +100,10 @@ async function getStats(req, res) {
 }
 
 async function getLeaderboard(req, res) {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
   try {
     const { rows } = await db.query(
       `SELECT
@@ -107,7 +111,7 @@ async function getLeaderboard(req, res) {
           u.display_name,
           u.avatar_url,
           COUNT(p.id) as total_songs,
-          SUM(p.duration_ms) / 60000 as total_minutes,
+          COALESCE(SUM(p.duration_ms) / 60000, 0) as total_minutes,
           (SELECT p2.artist_name FROM plays p2
             WHERE p2.user_id = u.id
             AND p2.played_at >= date_trunc('week', NOW())
@@ -117,8 +121,18 @@ async function getLeaderboard(req, res) {
          FROM users u
          LEFT JOIN plays p ON p.user_id = u.id
            AND p.played_at >= date_trunc('week', NOW())
+         WHERE u.id = $1
+           OR EXISTS (
+             SELECT 1 FROM friendships f
+             WHERE f.status = 'accepted'
+               AND (
+                 (f.requester_id = $1 AND f.addressee_id = u.id)
+                 OR (f.addressee_id = $1 AND f.requester_id = u.id)
+               )
+           )
          GROUP BY u.id
          ORDER BY total_minutes DESC`,
+      [req.session.userId]
     );
 
     return res.json(rows);

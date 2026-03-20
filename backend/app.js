@@ -6,6 +6,7 @@ import artistRoutes from "./routes/artists.js";
 import showRoutes from "./routes/shows.js";
 import session from "express-session";
 import statsRoutes from "./routes/stats.js";
+import friendRoutes from "./routes/friends.js";
 const app = express();
 
 app.use(cors({
@@ -27,6 +28,7 @@ app.use("/auth", authRoutes);
 app.use("/artists", artistRoutes);
 app.use("/shows", showRoutes);
 app.use("/stats", statsRoutes);
+app.use("/friends", friendRoutes);
 
 // Start background jobs
 // startCronJobs();
