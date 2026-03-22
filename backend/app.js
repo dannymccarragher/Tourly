@@ -42,8 +42,9 @@ app.use("/friends", friendRoutes);
 app.use("/", recommendationsRoutes);
 
 // Start background jobs
-startCronJobs();
+// Add back for prod, not for local dev
+// startCronJobs();
 
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Tourly server running on port ${PORT}`));
